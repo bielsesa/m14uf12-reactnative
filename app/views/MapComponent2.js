@@ -8,7 +8,6 @@ const randomColor = () => {
     return '#' + Math.floor(Math.random() * 16777215).toString(16);
 }
 
-
 export default class MapComponent extends React.Component {
     constructor(props) {
         super(props);
@@ -31,9 +30,9 @@ export default class MapComponent extends React.Component {
         };
     }
 
-    saveAddress() {
-        console.log(JSON.stringify(this.state.markers.coordinate.latitude));
-        console.log(JSON.stringify(this.state.markers.coordinate.longitude));
+    saveAddress() {    
+        console.log(JSON.stringify(this.state.markers.coordinate.latitude))
+        console.log(JSON.stringify(this.state.markers.coordinate.longitude))
 
         this.state.db = SQLite.openDatabase('db.db');
         this.state.db.transaction(tx => {
@@ -51,7 +50,6 @@ export default class MapComponent extends React.Component {
         );
     }
 
-
     onMapPress(e) {
         this.setState({
             markers:
@@ -61,13 +59,11 @@ export default class MapComponent extends React.Component {
                 color: randomColor(),
             },
         });
-
-
     }
 
     render() {
         return (
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <View style={styles.container}>
                 <MapView
                     provider={this.props.provider}
                     style={styles.mapStyle}
@@ -85,11 +81,12 @@ export default class MapComponent extends React.Component {
                         </View>
                     </Marker>
                 </MapView>
-                <TouchableOpacity style={styles.Button} onPress={() => this.saveAddress()}>
-                    <Text style={styles.ButtonText}>Guardar coordenadas</Text>
-                </TouchableOpacity>
+                <View style={styles.ButtonArea}>
+                    <TouchableOpacity style={styles.Button} onPress={() => this.saveAddress()}>
+                        <Text style={styles.ButtonText}>GUARDAR COORDENADES</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
-
         );
     }
 }
@@ -105,8 +102,11 @@ const styles = StyleSheet.create({
         width: Dimensions.get('window').width,
         height: Dimensions.get('window').height - 100,
     },
-    button: {
-        flex: 1
+    ButtonArea: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignItems: 'center'
     },
     Button: {
         width: 80,
@@ -121,4 +121,3 @@ const styles = StyleSheet.create({
         fontSize: 14,
     }
 });
-
