@@ -6,14 +6,15 @@ import * as SQLite from 'expo-sqlite';
 
 import MapViewDirections from 'react-native-maps-directions';
 
-const origin = { latitude: 41.4085324, longitude: 2.202106 };
-const destination = { latitude: 41.4103908, longitude: 2.1943033 };
+/* const origin = { latitude: 41.4085324, longitude: 2.202106 };
+const destination = { latitude: 41.4103908, longitude: 2.1943033 }; */
 const GOOGLE_MAPS_APIKEY = 'AIzaSyCHxJJeGEp1yveNJSDi6wwpZxPn0KcndYs';
 
 
 const randomColor = () => {
     return '#' + Math.floor(Math.random() * 16777215).toString(16);
 }
+
 
 export default class MapComponent extends React.Component {
     constructor(props) {
@@ -33,24 +34,31 @@ export default class MapComponent extends React.Component {
                 },
                 key: 1,
                 color: randomColor(),
-            }
+            },
+            contador: 0,
+            origin: { latitude: 0, longitude: 0 },
+            destination: { latitude: 0, longitude: 0 }
+
         };
     }
 
     saveAddress() {
+
         console.log(JSON.stringify(this.state.markers.coordinate.latitude));
         console.log(JSON.stringify(this.state.markers.coordinate.longitude));
 
         this.state.db = SQLite.openDatabase('db.db');
         this.state.db.transaction(tx => {
+            tx.executeSql("drop table if exists coordenadas");
             tx.executeSql(
-                "create table if not exists coordenadas (id integer primary key not null, latitude real, longitude real, img text);"
+                "create table if not exists coordenadas (id integer primary key not null, latitude real, longitude real);"
             );
+            console.log('transacció crear taula');
         });
 
         this.state.db.transaction(
             tx => {
-                tx.executeSql(`insert into coordenadas (latitude, longitude) values (${this.state.markers.coordinate.latitude},${this.state.markers.coordinate.longitude},'')`);
+                tx.executeSql(`insert into coordenadas (latitude, longitude) values (${this.state.markers.coordinate.latitude},${this.state.markers.coordinate.longitude})`);
             }
         );
     }
@@ -66,6 +74,19 @@ export default class MapComponent extends React.Component {
             },
         });
 
+        this.state.contador++;
+        if (this.state.contador == 1) {
+            this.state.origin.latitude = this.state.markers.coordinate.latitude;
+            this.state.origin.longitude = this.state.markers.coordinate.longitude;
+            console.log("primer click origin: " + JSON.stringify(this.state.origin));
+        }
+        if (this.state.contador == 2) {
+            this.state.destination.latitude = this.state.markers.coordinate.latitude;
+            this.state.destination.longitude = this.state.markers.coordinate.longitude;
+            console.log("segundo click destination: " + JSON.stringify(this.state.destination));
+            this.setState({ contador: 0 });
+        }
+
 
     }
 
@@ -78,11 +99,7 @@ export default class MapComponent extends React.Component {
                     initialRegion={this.state.region}
                     onPress={e => this.onMapPress(e)}
                 >
-                    <MapViewDirections
-                        origin={origin}
-                        destination={destination}
-                        apikey={GOOGLE_MAPS_APIKEY}
-                    />
+
                     <Marker
                         key={this.state.markers.key}
                         coordinate={this.state.markers.coordinate}
@@ -92,6 +109,14 @@ export default class MapComponent extends React.Component {
                             <Text style={styles.text}>
                                 {JSON.stringify(this.state.markers.coordinate)}</Text>
                         </View>
+                        <MapViewDirections
+                            origin={this.state.origin}
+                            destination={this.state.destination}
+                            apikey={GOOGLE_MAPS_APIKEY}
+                            strokeWidth={3}
+                            strokeColor="hotpink"
+                            optimizeWaypoints={true}
+                        />
                     </Marker>
                 </MapView>
                 <TouchableOpacity style={styles.Button} onPress={() => this.saveAddress()}>
