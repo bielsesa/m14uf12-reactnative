@@ -4,6 +4,13 @@ import MapView from 'react-native-maps';
 import { Marker, UrlTile } from 'react-native-maps';
 import * as SQLite from 'expo-sqlite';
 
+import MapViewDirections from 'react-native-maps-directions';
+
+const origin = { latitude: 41.4085324, longitude: 2.202106 };
+const destination = { latitude: 41.4103908, longitude: 2.1943033 };
+const GOOGLE_MAPS_APIKEY = 'AIzaSyCHxJJeGEp1yveNJSDi6wwpZxPn0KcndYs';
+
+
 const randomColor = () => {
     return '#' + Math.floor(Math.random() * 16777215).toString(16);
 }
@@ -71,6 +78,11 @@ export default class MapComponent extends React.Component {
                     initialRegion={this.state.region}
                     onPress={e => this.onMapPress(e)}
                 >
+                    <MapViewDirections
+                        origin={origin}
+                        destination={destination}
+                        apikey={GOOGLE_MAPS_APIKEY}
+                    />
                     <Marker
                         key={this.state.markers.key}
                         coordinate={this.state.markers.coordinate}
@@ -85,7 +97,11 @@ export default class MapComponent extends React.Component {
                 <TouchableOpacity style={styles.Button} onPress={() => this.saveAddress()}>
                     <Text style={styles.ButtonText}>Guardar coordenadas</Text>
                 </TouchableOpacity>
-            </View>
+
+
+
+
+            </View >
 
         );
     }
