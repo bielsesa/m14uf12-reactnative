@@ -8,7 +8,6 @@ const randomColor = () => {
     return '#' + Math.floor(Math.random() * 16777215).toString(16);
 }
 
-
 export default class MapComponent extends React.Component {
     constructor(props) {
         super(props);
@@ -37,16 +36,14 @@ export default class MapComponent extends React.Component {
 
         this.state.db = SQLite.openDatabase('db.db');
         this.state.db.transaction(tx => {
-            tx.executeSql("drop table if exists coordenadas");
             tx.executeSql(
-                "create table if not exists coordenadas (id integer primary key not null, latitude real, longitude real);"
+                "create table if not exists coordenadas (id integer primary key not null, latitude real, longitude real, img text);"
             );
-            console.log('transacció crear taula');
         });
 
         this.state.db.transaction(
             tx => {
-                tx.executeSql(`insert into coordenadas (latitude, longitude) values (${this.state.markers.coordinate.latitude},${this.state.markers.coordinate.longitude})`);
+                tx.executeSql(`insert into coordenadas (latitude, longitude) values (${this.state.markers.coordinate.latitude},${this.state.markers.coordinate.longitude},'')`);
             }
         );
     }

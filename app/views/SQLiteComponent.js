@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
 import * as SQLite from 'expo-sqlite';
+import { ScrollView } from 'react-native-gesture-handler';
 
 class SQLiteComponent extends React.Component {
     constructor(props) {
@@ -15,7 +16,7 @@ class SQLiteComponent extends React.Component {
         this.state.db.transaction(tx => {
             /* tx.executeSql("drop table if exists coordenadas"); */
             tx.executeSql(
-                "create table if not exists coordenadas (id integer primary key not null, latitud real, longitud real);"
+                "create table if not exists coordenadas (id integer primary key not null, latitude real, longitude real, img text);"
             );
             console.log('transacció crear taula');
             tx.executeSql("select * from coordenadas", [], (_, { rows }) => {
@@ -31,8 +32,8 @@ class SQLiteComponent extends React.Component {
         console.log('abans d`inserció dades');
         this.state.db.transaction(
             tx => {
-                tx.executeSql("insert into coordenadas (latitude, longitude) values (41.4388402,2.2396605)");
-                tx.executeSql("insert into coordenadas (latitude, longitude) values (41.42241,2.1993313)");
+                tx.executeSql("insert into coordenadas (latitude, longitude, img) values (41.4388402,2.2396605, '')");
+                tx.executeSql("insert into coordenadas (latitude, longitude, img) values (41.42241,2.1993313, '')");
                 tx.executeSql("select * from coordenadas", [], (_, { rows }) => {
                     console.log(JSON.stringify(rows));
                     this.setState({ datos: JSON.stringify(rows) });
