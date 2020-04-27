@@ -65,7 +65,7 @@ export default class MapComponent extends React.Component {
 
         this.state.db = SQLite.openDatabase('db.db');
         this.state.db.transaction(tx => {
-            tx.executeSql("drop table if exists coordenadas");
+           
             tx.executeSql(
                 "create table if not exists coordenadas (id integer primary key not null, latitude real, longitude real);"
             );
@@ -104,7 +104,6 @@ export default class MapComponent extends React.Component {
             },
         });
 
-        
 
     }
 

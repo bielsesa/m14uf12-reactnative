@@ -12,7 +12,7 @@ const Stack = createStackNavigator();
 function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator initialRouteName="Home">
         <Stack.Screen name="Home" component={HomeComponent} />
         <Stack.Screen name="SQLite" component={SQLiteComponent} />
         <Stack.Screen name="MapComponent" component={MapComponent} />
