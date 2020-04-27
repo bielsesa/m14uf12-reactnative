@@ -6,9 +6,15 @@ import * as SQLite from 'expo-sqlite';
 
 import MapViewDirections from 'react-native-maps-directions';
 
-/* const origin = { latitude: 41.4085324, longitude: 2.202106 };
-const destination = { latitude: 41.4103908, longitude: 2.1943033 }; */
+const { width, height } = Dimensions.get('window');
+const ASPECT_RATIO = width / height;
+const origin = { latitude: 41.4085324, longitude: 2.202106 };
+const destination = { latitude: 41.4103908, longitude: 2.1943033 };
 const GOOGLE_MAPS_APIKEY = 'AIzaSyCHxJJeGEp1yveNJSDi6wwpZxPn0KcndYs';
+const LATITUDE = 37.771707;
+const LONGITUDE = -122.4053769;
+const LATITUDE_DELTA = 0.0922;
+const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
 
 const randomColor = () => {
@@ -21,6 +27,16 @@ export default class MapComponent extends React.Component {
         super(props);
 
         this.state = {
+            coordinates: [
+                {
+                    latitude: 41.4085324,
+                    longitude: 2.202106,
+                },
+                {
+                    latitude: 41.4103908,
+                    longitude: 2.1943033,
+                },
+            ],
             region: {
                 latitude: 41.3948976,
                 longitude: 2.0787282,
@@ -35,11 +51,11 @@ export default class MapComponent extends React.Component {
                 key: 1,
                 color: randomColor(),
             },
-            contador: 0,
-            origin: { latitude: 0, longitude: 0 },
-            destination: { latitude: 0, longitude: 0 }
+            
 
         };
+
+        this.mapView = null;
     }
 
     saveAddress() {
@@ -65,6 +81,20 @@ export default class MapComponent extends React.Component {
 
 
     onMapPress(e) {
+        if (this.state.coordinates.length == 2) {
+            this.setState({
+                coordinates: [
+                    e.nativeEvent.coordinate,
+                ],
+            });
+        } else {
+            this.setState({
+                coordinates: [
+                    ...this.state.coordinates,
+                    e.nativeEvent.coordinate,
+                ],
+            });
+        }
         this.setState({
             markers:
             {
@@ -74,20 +104,23 @@ export default class MapComponent extends React.Component {
             },
         });
 
-        this.state.contador++;
-        if (this.state.contador == 1) {
-            this.state.origin.latitude = this.state.markers.coordinate.latitude;
-            this.state.origin.longitude = this.state.markers.coordinate.longitude;
-            console.log("primer click origin: " + JSON.stringify(this.state.origin));
-        }
-        if (this.state.contador == 2) {
-            this.state.destination.latitude = this.state.markers.coordinate.latitude;
-            this.state.destination.longitude = this.state.markers.coordinate.longitude;
-            console.log("segundo click destination: " + JSON.stringify(this.state.destination));
-            this.setState({ contador: 0 });
-        }
+        
 
+    }
 
+    onReady = (result) => {
+        this.mapView.fitToCoordinates(result.coordinates, {
+            edgePadding: {
+                right: (width / 20),
+                bottom: (height / 20),
+                left: (width / 20),
+                top: (height / 20),
+            }
+        });
+    }
+
+    onError = (errorMessage) => {
+        Alert.alert(errorMessage);
     }
 
     render() {
@@ -98,8 +131,24 @@ export default class MapComponent extends React.Component {
                     style={styles.mapStyle}
                     initialRegion={this.state.region}
                     onPress={e => this.onMapPress(e)}
+                    ref={c => this.mapView = c}
+                    loadingEnabled={true}
                 >
-
+                    {this.state.coordinates.map((coordinate, index) =>
+                        <MapView.Marker key={`coordinate_${index}`} coordinate={coordinate} /> // eslint-disable-line react/no-array-index-key
+                    )}
+                    {(this.state.coordinates.length === 2) && (
+                        <MapViewDirections
+                            origin={this.state.coordinates[0]}
+                            destination={this.state.coordinates[1]}
+                            apikey={GOOGLE_MAPS_APIKEY}
+                            strokeWidth={3}
+                            strokeColor="hotpink"
+                            onReady={this.onReady}
+                            onError={this.onError}
+                        />
+                    )}
+                  
                     <Marker
                         key={this.state.markers.key}
                         coordinate={this.state.markers.coordinate}
@@ -109,14 +158,7 @@ export default class MapComponent extends React.Component {
                             <Text style={styles.text}>
                                 {JSON.stringify(this.state.markers.coordinate)}</Text>
                         </View>
-                        <MapViewDirections
-                            origin={this.state.origin}
-                            destination={this.state.destination}
-                            apikey={GOOGLE_MAPS_APIKEY}
-                            strokeWidth={3}
-                            strokeColor="hotpink"
-                            optimizeWaypoints={true}
-                        />
+
                     </Marker>
                 </MapView>
                 <TouchableOpacity style={styles.Button} onPress={() => this.saveAddress()}>
